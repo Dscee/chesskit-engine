@@ -38,25 +38,43 @@ public enum EngineType: Int {
     /// Engine-specific options to configure at initialization.
     var setupCommands: [EngineCommand] {
         switch self {
-        case .stockfish:
-            let fileOptions = [
-                "EvalFile": "nn-b1a57edbea57",
-                "EvalFileSmall": "nn-baff1ede1f90"
-            ].compactMapValues {
-                Bundle.main.url(forResource: $0, withExtension: "nnue")?.path()
+            case .stockfish:
+                if #available(iOS 16.0, *) {
+                    let fileOptions = [
+                        "EvalFile": "nn-b1a57edbea57",
+                        "EvalFileSmall": "nn-baff1ede1f90"
+                    ].compactMapValues {
+                        Bundle.main.url(forResource: $0, withExtension: "nnue")?.path(percentEncoded: false)
+                    }
+                     return fileOptions.map(EngineCommand.setoption)
+                } else {
+                    let fileOptions = [
+                        "EvalFile": "nn-b1a57edbea57",
+                        "EvalFileSmall": "nn-baff1ede1f90"
+                    ].compactMapValues {
+                        Bundle.main.url(forResource: $0, withExtension: "nnue")?.path
+                    }
+                    return fileOptions.map(EngineCommand.setoption)
+                }
+            case .lc0:
+                if #available(iOS 16.0, *) {
+                    let fileOptions = [
+                        "WeightsFile": "192x15_network"
+                    ].compactMapValues {
+                        Bundle.main.url(forResource: $0, withExtension: nil)?.path(percentEncoded: false)
+                    }
+                return fileOptions.map(EngineCommand.setoption)
+                } else {
+                    let fileOptions = [
+                        "WeightsFile": "192x15_network"
+                    ].compactMapValues {
+                        Bundle.main.url(forResource: $0, withExtension: nil)?.path
+                    }
+                    return fileOptions.map(EngineCommand.setoption)
             }
-
-            return fileOptions.map(EngineCommand.setoption)
-        case .lc0:
-            let fileOptions = [
-                "WeightsFile": "192x15_network"
-            ].compactMapValues {
-                Bundle.main.url(forResource: $0, withExtension: nil)?.path()
-            }
-
-            return fileOptions.map(EngineCommand.setoption)
-        }
     }
+}
+
 
 }
 
